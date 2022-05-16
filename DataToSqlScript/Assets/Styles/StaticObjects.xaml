@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rkClientConv="clr-namespace:Rk.Client.Converters;assembly=Rk.Client.Desktop">
+
+
+    <!-- Converters -->
+    <rkClientConv:ValueToBoolConverter x:Key="valueToBool"/>
+    <rkClientConv:BoolToVisibilityConverter x:Key="boolToVis"/>
+    <rkClientConv:NotBoolToVisibilityConverter x:Key="notBoolToVis"/>
+    <rkClientConv:EnumToLocalizeConverter x:Key="enumConverter"/>
+    <rkClientConv:EnumToBooleanConverter x:Key="enumToBoolean"/>
+
+</ResourceDictionary>
