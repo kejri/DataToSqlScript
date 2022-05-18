@@ -22,5 +22,8 @@ namespace DataToSqlScript.Main.Interfaces
         DelegateCommand<object> InvertCommand { get; set; }
         DataTable Data { get; set; }
         string Script { get; set; }
+        int? Top { get; set; }
+        string Where { get; set; }
+        string Order { get; set; }
     }
 }

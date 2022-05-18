@@ -56,8 +56,11 @@ namespace DataToSqlScript.Main
         public TabItem TiData { get => tiData; }
         //public TabItem TiOptions { get => tiOptions; }
         public TabItem TiScript { get => tiScript; }
-        public DataGrid DataGrid { get => dataGrid;}
+        public DataGrid DgFields { get => dgFields;}
         public DataGrid DgData { get => dgData; }
+        //public TextBox TbTop { get => tbTop; }
+        //public TextBox TbWhere{ get => tbWhere; }
+        //public TextBox TbOrder { get => tbOrder; }
 
         #endregion
 

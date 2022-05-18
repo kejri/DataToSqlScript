@@ -112,9 +112,17 @@ namespace DataToSqlScript.Main
         private DataTable m_Data;
         public DataTable Data { get => m_Data; set { m_Data = value; NotifyPropertyChanged(); } }
 
-
         private string m_Script;
         public string Script { get => m_Script; set { m_Script = value; NotifyPropertyChanged(); } }
+
+        private int? m_Top;
+        public int? Top { get => m_Top; set { m_Top = value; NotifyPropertyChanged(); } }
+
+        private string m_Where;
+        public string Where { get => m_Where; set { m_Where = value; NotifyPropertyChanged(); } }
+
+        private string m_Order;
+        public string Order { get => m_Order; set { m_Order = value; NotifyPropertyChanged(); } }
 
         #endregion
 
@@ -470,11 +478,27 @@ ORDER BY
         {
             using (SqlConnection conn = new SqlConnection(m_ConnString))
             {
+                string top = string.Empty;
+                if (Top != null)
+                {
+                    top = $"top ({Top})";
+                }
+                string where = string.Empty;
+                if (Where != null)
+                {
+                    where = $"where {Where}";
+                }
+                string order = string.Empty;
+                if (Order != null)
+                {
+                    order = $"order by {Order}";
+                }
                 SqlCommand command = new SqlCommand(String.Format(@"
-select {0}
-from {1}
-where {2}
-", getRowFields(), TableName, getWhere(), getOrder()), conn);
+select {0} {1}
+from {2}
+{3}
+{4}
+", top, getRowFields(), TableName, where, order), conn);
                 DataTable dataTable = new DataTable("Data");
                 SqlDataAdapter da = new SqlDataAdapter(command);
                 da.Fill(dataTable);
@@ -498,16 +522,6 @@ where {2}
                 }
             }
             return result;
-        }
-
-        private object? getWhere()
-        {
-            return "0=0";
-        }
-
-        private object? getOrder()
-        {
-            return "Id";
         }
 
         private void CreateScript()
@@ -654,9 +668,9 @@ where {2}
 
         protected virtual void Invert(object obj)
         {
-            if ((View.DataGrid.SelectedItems != null) && (View.DataGrid.SelectedItems.Count > 0))
+            if ((View.DgFields.SelectedItems != null) && (View.DgFields.SelectedItems.Count > 0))
             {
-                foreach (DbField item in View.DataGrid.SelectedItems)
+                foreach (DbField item in View.DgFields.SelectedItems)
                 {
                     item.IsSelect = !item.IsSelect;
                 }

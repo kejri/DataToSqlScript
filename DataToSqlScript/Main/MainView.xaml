@@ -61,18 +61,30 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </DockPanel>
-                        <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="Obrátit" Command="{Binding Path=InvertCommand}" CommandParameter="{Binding}"/>
+                        <DockPanel DockPanel.Dock="Left">
+                            <TextBlock DockPanel.Dock="Top" Text="Top" Foreground="White" Margin="14,2"/>
+                            <TextBox Text="{Binding Path=Top, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" Width="80" Margin="10,0"/>
+                        </DockPanel>
+                        <DockPanel DockPanel.Dock="Right">
+                            <Button DockPanel.Dock="Bottom" Content="Obrátit" Command="{Binding Path=InvertCommand}" CommandParameter="{Binding}"/>
                             <Grid/>
                         </DockPanel>
+                        <DockPanel DockPanel.Dock="Right">
+                            <TextBlock DockPanel.Dock="Top" Text="Order" Foreground="White" Margin="14,2"/>
+                            <TextBox Text="{Binding Path=Order, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" Width="200" Margin="10,0"/>
+                        </DockPanel>
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Where" Foreground="White" Margin="10,2"/>
+                            <TextBox Text="{Binding Path=Where, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" Margin="2,0"/>
+                        </DockPanel>
                     </DockPanel>
-                    <DataGrid x:Name="dataGrid" ItemsSource="{Binding Path=DbFields}" IsReadOnly="False" SelectionMode="Extended" AutoGenerateColumns="False" HeadersVisibility="Column" IsTabStop="False" CanUserAddRows="False">
+                    <DataGrid x:Name="dgFields" ItemsSource="{Binding Path=DbFields}" IsReadOnly="False" SelectionMode="Extended" AutoGenerateColumns="False" HeadersVisibility="Column" IsTabStop="False" CanUserAddRows="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding Path=PK}" Header="PK" HeaderStyle="{StaticResource HeaderCenterStyle}" CanUserReorder="False" IsReadOnly="True"/>
                             <DataGridCheckBoxColumn Binding="{Binding Path=IsSelect}" Header="I" HeaderStyle="{StaticResource HeaderCenterStyle}" CanUserReorder="False" IsReadOnly="False" Visibility="{Binding Source={StaticResource dataContextProxy}, Path=DataSource.ScriptType, Converter={StaticResource enumToBoolean}, ConverterParameter='Insert'}"/>
                             <DataGridCheckBoxColumn Binding="{Binding Path=IsSelect}" Header="U" HeaderStyle="{StaticResource HeaderCenterStyle}" CanUserReorder="False" IsReadOnly="False" Visibility="{Binding Source={StaticResource dataContextProxy}, Path=DataSource.ScriptType, Converter={StaticResource enumToBoolean}, ConverterParameter='Update'}"/>
                             <DataGridCheckBoxColumn Binding="{Binding Path=IsWhere}" Header="W" HeaderStyle="{StaticResource HeaderCenterStyle}" CanUserReorder="False" IsReadOnly="False" Visibility="{Binding Source={StaticResource dataContextProxy}, Path=DataSource.ScriptType, Converter={StaticResource enumToBoolean}, ConverterParameter='Update'}"/>
-                            <DataGridTextColumn Binding="{Binding Path=Name}" Header="Name" CanUserReorder="False" IsReadOnly="True"/>
+                            <DataGridTextColumn Binding="{Binding Path=Name}" Header="Name" CanUserReorder="False" IsReadOnly="False"/>
                             <DataGridTextColumn Binding="{Binding Path=DbType}" Header="FieldType" CanUserReorder="False" IsReadOnly="True"/>
                             <DataGridTextColumn Binding="{Binding Path=DbSize}" Header="Size" CanUserReorder="False" IsReadOnly="True"/>
                             <DataGridTextColumn Binding="{Binding Path=DbScale}" Header="Scale" CanUserReorder="False" IsReadOnly="True"/>
