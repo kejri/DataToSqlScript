@@ -23,7 +23,7 @@ namespace DataToSqlScript.Helpers
         public bool IsSelect { get => m_IsSelect; set { m_IsSelect = value; NotifyPropertyChanged(); } }
 
         private bool m_IsWhere;
-        public bool IsWhere { get => m_IsWhere; set { m_IsWhere = value; NotifyPropertyChanged(); } }
+        public bool IsWhere { get => m_IsWhere; set { m_IsWhere = value; NotifyPropertyChanged(); if (m_IsWhere) { IsSelect = false; } } }
         public string NameExt
         {
             get

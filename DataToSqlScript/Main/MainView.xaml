@@ -90,8 +90,29 @@
                             <GradientStop Color="#FF6EB6FF" Offset="1"/>
                         </LinearGradientBrush>
                     </DockPanel.Background>
-                    <DataGrid ItemsSource="{Binding Path=Data}" IsReadOnly="True" AutoGenerateColumns="True" HeadersVisibility="Column" IsTabStop="False" CanUserAddRows="False">
+                    <DataGrid x:Name="dgData" ItemsSource="{Binding Path=Data}" IsReadOnly="True" AutoGenerateColumns="True" HeadersVisibility="Column" IsTabStop="False" CanUserAddRows="False">
                     </DataGrid>
+                </DockPanel>
+            </TabItem>
+            <!--<TabItem x:Name="tiOptions" Visibility="Collapsed">
+                <DockPanel>
+                    <DockPanel.Background>
+                        <LinearGradientBrush EndPoint="0.5,0.977" StartPoint="0.5,0.023">
+                            <GradientStop Color="#FF001B35" Offset="0"/>
+                            <GradientStop Color="#FF6EB6FF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </DockPanel.Background>
+                </DockPanel>
+            </TabItem>-->
+            <TabItem x:Name="tiScript" Visibility="Collapsed">
+                <DockPanel>
+                    <DockPanel.Background>
+                        <LinearGradientBrush EndPoint="0.5,0.977" StartPoint="0.5,0.023">
+                            <GradientStop Color="#FF001B35" Offset="0"/>
+                            <GradientStop Color="#FF6EB6FF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </DockPanel.Background>
+                    <TextBox Text="{Binding Path=Script}" TextWrapping="NoWrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                 </DockPanel>
             </TabItem>
         </TabControl>

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -111,6 +112,9 @@ namespace DataToSqlScript.Main
         private DataTable m_Data;
         public DataTable Data { get => m_Data; set { m_Data = value; NotifyPropertyChanged(); } }
 
+
+        private string m_Script;
+        public string Script { get => m_Script; set { m_Script = value; NotifyPropertyChanged(); } }
 
         #endregion
 
@@ -214,6 +218,13 @@ order by table_name", m_DbSchema
             else if (tabItemNew == View.TiData && tabItemOld == View.TiFields)
             {
                 Data = loadData();
+            }
+            //else if (tabItemNew == View.TiOptions && tabItemOld == View.TiData)
+            //{
+            //}
+            else if (tabItemNew == View.TiScript && tabItemOld == View.TiData)
+            {
+                CreateScript();
             }
         }
 
@@ -481,7 +492,7 @@ where {2}
                 {
                     odd = ", ";
                 }
-                if (item.IsSelect)
+                if (item.IsSelect || (ScriptType == ScriptType.Update && item.IsWhere))
                 {
                     result += odd + item.Name;
                 }
@@ -497,6 +508,140 @@ where {2}
         private object? getOrder()
         {
             return "Id";
+        }
+
+        private void CreateScript()
+        {
+            var sql = string.Empty;
+            if ((View.DgData.SelectedItems != null) && (View.DgData.SelectedItems.Count > 0))
+            {
+                foreach (DataRowView item in View.DgData.SelectedItems)
+                {
+                    sql += (CreateScriptOneRow(item.Row)) + Environment.NewLine;
+                }
+            }
+            else
+            {
+                foreach (DataRowView item in View.DgData.Items)
+                {
+                    sql += (CreateScriptOneRow(item.Row)) + Environment.NewLine;
+                }
+            }
+
+            Script = sql;
+
+            //using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(sql)))
+            //{
+
+            //}
+        }
+
+        private string CreateScriptOneRow(DataRow row)
+        {
+            if (ScriptType == ScriptType.Insert)
+            {
+                return CreateScriptInsert(row);
+            }
+            else if (ScriptType == ScriptType.Update)
+            {
+                return CreateScriptUpdate(row);
+            }
+            return null;
+        }
+
+        private string CreateScriptInsert(DataRow row)
+        {
+            string sqlFields = string.Empty;
+            string sqlValues = string.Empty;
+            foreach (DataColumn item in row.Table.Columns)
+            {
+                var value = row[item.ColumnName];
+                var field = DbFields.FirstOrDefault(i => i.Name == item.ColumnName);
+                if (field != null && field.IsSelect)
+                {
+                    string odd = string.Empty;
+                    if (!string.IsNullOrEmpty(sqlFields))
+                    {
+                        odd = ", ";
+                    }
+                    sqlFields += odd + $"{item.ColumnName}";
+                    sqlValues += odd + $"{valueToString(value, field)}";
+                }
+            }
+            string sql = $"insert into {TableName} ({sqlFields}) values ({sqlValues});";
+            return sql;
+        }
+
+        private string CreateScriptUpdate(DataRow row)
+        {
+            string sqlFields = string.Empty;
+            foreach (DataColumn item in row.Table.Columns)
+            {
+                var value = row[item.ColumnName];
+                var field = DbFields.FirstOrDefault(i => i.Name == item.ColumnName);
+                if (field != null && field.IsSelect)
+                {
+                    string odd = string.Empty;
+                    if (!string.IsNullOrEmpty(sqlFields))
+                    {
+                        odd = ", ";
+                    }
+                    sqlFields += odd + $"{item.ColumnName}={valueToString(value, field)}";
+                }
+            }
+            string sql = $"update {TableName} set {sqlFields} where {getUpdatePK(row)};";
+            return sql;
+        }
+
+        private string getUpdatePK(DataRow row)
+        {
+            string result = string.Empty;
+            foreach (var item in DbFields.OrderBy(i => i.PK))
+            {
+                if (item.IsWhere)
+                {
+                    var value = row[item.Name];
+                    string odd = string.Empty;
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        odd = ", ";
+                    }
+                    result += odd + $"{item.Name}={valueToString(value, item)}";
+                }
+            }
+            return result;
+        }
+
+        private string valueToString(object value, DbField item)
+        {
+            if (value == null || value is DBNull)
+            {
+                return "null";
+            }
+
+            if (value is string || value is Guid)
+            {
+                return $"'{value?.ToString().Replace("'", "''")}'";
+            }
+            else if (value is DateTime)
+            {
+                string format = "yyyy-MM-dd HH:mm:ss";
+                if (item.DbType == "DbDate")
+                {
+                    format = "yyyy-MM-dd";
+                }
+                return $"'{((DateTime)value).ToString(format)}'";
+            }
+            else if (value is bool)
+            {
+                return $"{Convert.ToInt32(value)}";
+            }
+
+            if (item.DbType == "DbDecimal")
+            {
+                return $"{value?.ToString().Replace(",", ".")}";
+            }
+            return $"{value?.ToString()}";
         }
 
 

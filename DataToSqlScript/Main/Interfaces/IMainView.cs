@@ -14,7 +14,11 @@ namespace DataToSqlScript.Main.Interfaces
         TabItem TiTable { get; }
         TabItem TiFields { get; }
         TabItem TiData { get; }
+        //TabItem TiOptions { get; }
+        TabItem TiScript { get; }
 
         DataGrid DataGrid { get; }
+
+        DataGrid DgData { get; }
     }
 }
