@@ -32,6 +32,10 @@ namespace DataToSqlScript.Helpers
             }
         }
 
+        private string m_DefValue;
+        public string DefValue { get => m_DefValue; set { m_DefValue = value; NotifyPropertyChanged(); } }
+
+
 
         #region INotifyPropertyChanged Members
 

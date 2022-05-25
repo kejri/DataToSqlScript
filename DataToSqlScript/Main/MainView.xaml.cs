@@ -51,6 +51,7 @@ namespace DataToSqlScript.Main
             }
         }
 
+        public TabControl TcMain { get => tcMain; }
         public TabItem TiTable { get => tiTables; }
         public TabItem TiFields { get => tiFields; }
         public TabItem TiData { get => tiData; }
@@ -75,14 +76,6 @@ namespace DataToSqlScript.Main
             set
             {
                 Model = value as IMainPM;
-            }
-        }
-
-        public TabControl TcMain
-        {
-            get
-            {
-                return tcMain;
             }
         }
 

@@ -11,6 +11,7 @@ namespace DataToSqlScript.Main.Interfaces
     public interface IMainView : IWizardViewBase
     {
         new IMainPM Model { get; set; }
+        TabControl TcMain { get; }
         TabItem TiTable { get; }
         TabItem TiFields { get; }
         TabItem TiData { get; }

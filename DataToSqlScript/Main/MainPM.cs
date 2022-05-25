@@ -109,6 +109,9 @@ namespace DataToSqlScript.Main
         private DelegateCommand<object> m_InvertCommand;
         public DelegateCommand<object> InvertCommand { get => m_InvertCommand; set { m_InvertCommand = value; NotifyPropertyChanged(); } }
 
+        private DelegateCommand<object> m_DefaultCommand;
+        public DelegateCommand<object> DefaultCommand { get => m_DefaultCommand; set { m_DefaultCommand = value; NotifyPropertyChanged(); } }
+
         private DataTable m_Data;
         public DataTable Data { get => m_Data; set { m_Data = value; NotifyPropertyChanged(); } }
 
@@ -150,6 +153,7 @@ namespace DataToSqlScript.Main
         {
             base.InitCommands();
             InvertCommand = new DelegateCommand<object>(Invert, CanInvert);
+            DefaultCommand = new DelegateCommand<object>(Default, CanDefault);
         }
 
         void InitEnums()
@@ -222,6 +226,7 @@ order by table_name", m_DbSchema
                 }
                 DbFields = dbFields;
                 setFieldsDefaults(ScriptType);
+                NextCommand.RaiseCanExecuteChanged();
             }
             else if (tabItemNew == View.TiData && tabItemOld == View.TiFields)
             {
@@ -234,6 +239,28 @@ order by table_name", m_DbSchema
             {
                 CreateScript();
             }
+        }
+
+        protected override bool CanNext(object obj)
+        {
+            bool isNext = true;
+            if (View.TcMain.SelectedItem == View.TiTable)
+            {
+                isNext = !string.IsNullOrEmpty(TableName);
+            }
+            else if (View.TcMain.SelectedItem == View.TiFields)
+            {
+                isNext = DbFields != null;
+                if (isNext)
+                {
+                    isNext = DbFields.Any(i => i.IsSelect);
+                    if (ScriptType == ScriptType.Update)
+                    {
+                        isNext = isNext && DbFields.Any(i => i.IsWhere);
+                    }
+                }
+            }
+            return isNext && base.CanNext(obj);
         }
 
         List<DbField> loadDbFields()
@@ -423,6 +450,40 @@ order by a.ordinal_position
             }
         }
 
+        string getDefaultValue(DbField field)
+        {
+            switch (field.DbType)
+            {
+                case "DbGuid":
+                    {
+                        return "NewId()";
+                    }
+                case "DbBool":
+                    {
+                        return "true";
+                    }
+
+                case "DbDate":
+                case "DbDatetime":
+                case "DbTimestamp":
+                    {
+                        return "GetDate()";
+                    }
+                case "DbSmallint":
+                case "DbInteger":
+                    {
+                        return "0";
+                    }
+
+                case "DbNUmeric":
+                case "DbDecimal":
+                    {
+                        return "0.00";
+                    }
+            }
+            return null;
+        }
+
         List<string> getPrimaryKey()
         {
             using (SqlConnection conn = new SqlConnection(m_ConnString))
@@ -456,14 +517,10 @@ ORDER BY
             {
                 foreach (var item in DbFields)
                 {
-                    if (item.PK.HasValue)
+                    if (item.PK.HasValue && ScriptType == ScriptType.Update)
                     {
-                        item.IsSelect = true;
+                        item.IsSelect = false;
                         item.IsWhere = true;
-                        if (scriptType == ScriptType.Update)
-                        {
-                            item.IsSelect = false;
-                        }
                     }
                     else
                     {
@@ -618,7 +675,7 @@ from {2}
                     string odd = string.Empty;
                     if (!string.IsNullOrEmpty(result))
                     {
-                        odd = ", ";
+                        odd = " and ";
                     }
                     result += odd + $"{item.Name}={valueToString(value, item)}";
                 }
@@ -628,6 +685,59 @@ from {2}
 
         private string valueToString(object value, DbField item)
         {
+            if (!string.IsNullOrEmpty(item.DefValue))
+            {
+                string sValue = item.DefValue;
+                switch (item.DbType)
+                {
+                    case "DbGuid":
+                        {
+                            if (item.DefValue.Trim().ToLower() == "newid()")
+                            {
+                                value = Guid.NewGuid();
+                            }
+                            break;
+                        }
+                    case "DbBool":
+                        {
+                            value = Convert.ToBoolean(sValue);
+                            break;
+                        }
+                    case "DbDate":
+                    case "DbDatetime":
+                    case "DbTimestamp":
+                        {
+                            if (item.DefValue.Trim().ToLower() == "getdate()")
+                            {
+                                value = DateTime.Now;
+                            }
+                            else
+                            {
+                                value = Convert.ToDateTime(sValue);
+                            }
+                            break;
+                        }
+                    case "DbSmallint":
+                    case "DbInteger":
+                        {
+                            value = Convert.ToInt32(sValue);
+                            break;
+                        }
+
+                    case "DbNUmeric":
+                    case "DbDecimal":
+                        {
+                            value = Convert.ToDecimal(sValue);
+                            break;
+                        }
+                    default:
+                        {
+                            value = sValue;
+                            break;
+                        }
+                }
+            }
+
             if (value == null || value is DBNull)
             {
                 return "null";
@@ -680,6 +790,23 @@ from {2}
                 foreach (var item in DbFields)
                 {
                     item.IsSelect = !item.IsSelect;
+                }
+            }
+            NextCommand.RaiseCanExecuteChanged();
+        }
+
+        protected virtual bool CanDefault(object obj)
+        {
+            return true;
+        }
+
+        protected virtual void Default(object obj)
+        {
+            if ((View.DgFields.SelectedItems != null) && (View.DgFields.SelectedItems.Count > 0))
+            {
+                foreach (DbField item in View.DgFields.SelectedItems)
+                {
+                    item.DefValue = getDefaultValue(item);
                 }
             }
         }
