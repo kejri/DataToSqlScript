@@ -22,7 +22,7 @@ namespace DataToSqlScript
         public App()
           : base()
         {
-            //this.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(App_DispatcherUnhandledException);
+            this.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(App_DispatcherUnhandledException);
 
             //CultureInfo? culture = null;
             //if (culture != null)
@@ -51,6 +51,11 @@ namespace DataToSqlScript
             // the browser's exception mechanism. On IE this will display it a yellow alert 
             // icon in the status bar and Firefox will display a script error.
             Exception exception = e.Exception.GetBaseException();
+            if (exception is Rk.Common.Exceptions.IRkException)
+            {
+                e.Handled = true;
+                MessageBox.Show(exception.Message, "Chyba aplikace", MessageBoxButton.OK);
+            }
 
             if (!e.Handled /*&& !System.Diagnostics.Debugger.IsAttached*/)
             {

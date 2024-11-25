@@ -4,6 +4,7 @@ using Prism.Commands;
 using Rk.Client.Wizards;
 using Rk.Client.Wizards.Interfaces;
 using Rk.Common;
+using Rk.Common.Exceptions;
 using Rk.Common.Extensions;
 using System;
 using System.Collections.Generic;
@@ -230,7 +231,14 @@ order by table_name", m_DbSchema
             }
             else if (tabItemNew == View.TiData && tabItemOld == View.TiFields)
             {
-                Data = loadData();
+                try
+                {
+                    Data = loadData();
+                }
+                catch (Exception ex)
+                {
+                    throw new RkApplicationException(ex.Message);
+                }
             }
             //else if (tabItemNew == View.TiOptions && tabItemOld == View.TiData)
             //{
@@ -552,10 +560,10 @@ ORDER BY
                 }
                 SqlCommand command = new SqlCommand(String.Format(@"
 select {0} {1}
-from {2}
-{3}
+from {2}.{3}
 {4}
-", top, getRowFields(), TableName, where, order), conn);
+{5}
+", top, getRowFields(), m_DbSchema, TableName, where, order), conn);
                 DataTable dataTable = new DataTable("Data");
                 SqlDataAdapter da = new SqlDataAdapter(command);
                 da.Fill(dataTable);
